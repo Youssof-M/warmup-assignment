@@ -8,6 +8,20 @@ const fs = require("fs");
 // ============================================================
 function getShiftDuration(startTime, endTime) {
     // TODO: Implement this function
+    // Convert start and end times into Date objects (arbitrary same date)
+    let start = new Date(`2026-03-06 ${startTime}`);
+    let end = new Date(`2026-03-06 ${endTime}`);
+             if (end < start) {
+        end.setDate(end.getDate() + 1);
+    }
+     let durationMs = end - start;
+    let totalSeconds = Math.floor(durationMs / 1000);
+    let hours = Math.floor(totalSeconds / 3600);
+    let mins = Math.floor((totalSeconds % 3600)/ 60);
+    let secs = totalSeconds % 60;
+
+    // Format as h:mm:ss
+    return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 }
 
 // ============================================================
@@ -108,6 +122,9 @@ function getRequiredHoursPerMonth(textFile, rateFile, bonusCount, driverID, mont
 function getNetPay(driverID, actualHours, requiredHours, rateFile) {
     // TODO: Implement this function
 }
+//test cases for first function
+console.log(getShiftDuration("9:00:00 am", "5:00:01 pm"));  
+console.log(getShiftDuration("7:30:00 am", "8:42:50 am"));  
 
 module.exports = {
     getShiftDuration,
