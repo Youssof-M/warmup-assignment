@@ -1,5 +1,18 @@
 const fs = require("fs");
 
+function helpertosecs(timeStr) {
+    let [h, m, s] = timeStr.split(":").map(Number);
+    return h*3600+m*60+s;
+}
+
+// Convert total seconds back to "h:mm:ss"
+function helpertotime(totalSeconds) {
+    const h = Math.floor(totalSeconds/3600);
+    const m = Math.floor((totalSeconds%3600)/60);
+    const s = totalSeconds%60;
+    return `${h}:${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}`;
+}
+
 // ============================================================
 // Function 1: getShiftDuration(startTime, endTime)
 // startTime: (typeof string) formatted as hh:mm:ss am or hh:mm:ss pm
@@ -7,21 +20,13 @@ const fs = require("fs");
 // Returns: string formatted as h:mm:ss
 // ============================================================
 function getShiftDuration(startTime, endTime) {
-    // TODO: Implement this function
-    // Convert start and end times into Date objects (arbitrary same date)
+
     let start = new Date(`2026-03-06 ${startTime}`);
     let end = new Date(`2026-03-06 ${endTime}`);
-             if (end < start) {
-        end.setDate(end.getDate() + 1);
-    }
-     let durationMs = end - start;
-    let totalSeconds = Math.floor(durationMs / 1000);
-    let hours = Math.floor(totalSeconds / 3600);
-    let mins = Math.floor((totalSeconds % 3600)/ 60);
-    let secs = totalSeconds % 60;
-
-    // Format as h:mm:ss
-    return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    if (end < start){
+         end.setDate(end.getDate()+1);}
+const durationSec = Math.floor((end-start)/1000);
+    return helpertotime(durationSec);
 }
 
 // ============================================================
@@ -31,8 +36,25 @@ function getShiftDuration(startTime, endTime) {
 // Returns: string formatted as h:mm:ss
 // ============================================================
 function getIdleTime(startTime, endTime) {
-    // TODO: Implement this function
+
+    const deliveryStart = new Date(`2026-03-06 8:00:00 AM`);
+    const deliveryEnd = new Date(`2026-03-06 10:00:00 PM`);
+    let start = new Date(`2026-03-06 ${startTime}`);
+    let end = new Date(`2026-03-06 ${endTime}`);
+    if (end < start) 
+        end.setDate(end.getDate() + 1);
+
+    let idleSec = 0;
+    if (start < deliveryStart){
+         idleSec += (deliveryStart - start)/1000;
+    }
+    if (end > deliveryEnd) {
+        idleSec += (end - deliveryEnd)/1000;
+    }
+    return helpertotime(Math.floor(idleSec));
 }
+
+
 
 // ============================================================
 // Function 3: getActiveTime(shiftDuration, idleTime)
@@ -41,7 +63,8 @@ function getIdleTime(startTime, endTime) {
 // Returns: string formatted as h:mm:ss
 // ============================================================
 function getActiveTime(shiftDuration, idleTime) {
-    // TODO: Implement this function
+    const activeSecs = helpertosecs(shiftDuration)-helpertosecs(idleTime);
+    return helpertotime(activeSecs);
 }
 
 // ============================================================
@@ -51,7 +74,13 @@ function getActiveTime(shiftDuration, idleTime) {
 // Returns: boolean
 // ============================================================
 function metQuota(date, activeTime) {
-    // TODO: Implement this function
+    let metquota;
+    if (date >= "2025-04-10" && date <= "2025-04-30") {
+        metquota = "6:00:00"; 
+    } else {
+        metquota = "8:24:00"; 
+    }
+return helpertosecs(activeTime)>=helpertosecs(metquota);
 }
 
 // ============================================================
@@ -122,10 +151,23 @@ function getRequiredHoursPerMonth(textFile, rateFile, bonusCount, driverID, mont
 function getNetPay(driverID, actualHours, requiredHours, rateFile) {
     // TODO: Implement this function
 }
-//test cases for first function
+//test cases for first function get shift duration
+console.log("first method test");
 console.log(getShiftDuration("9:00:00 am", "5:00:01 pm"));  
 console.log(getShiftDuration("7:30:00 am", "8:42:50 am"));  
+//test cases for second function get idle time
+console.log("second method test");
+console.log(getIdleTime("8:00:00 am", "11:00:00 pm"));  
+console.log(getIdleTime("6:00:01 am", "11:30:00 pm"));
+// test cases for third function get active time
+console.log("third method test");
+console.log(getActiveTime("6:00:20", "3:00:01"));  
+console.log(getActiveTime("8:30:00", "0:00:00"));  
+console.log("fourth method test");
 
+//test cases for fourth function get met quota
+console.log(metQuota("2025-04-15", "6:50:00"));  
+console.log(metQuota("2025-04-05", "7:42:59")); 
 module.exports = {
     getShiftDuration,
     getIdleTime,
